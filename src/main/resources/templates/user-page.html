@@ -13,10 +13,11 @@
 <nav class="navbar navbar-dark bg-dark px-3">
     <div class="container-fluid">
         <!-- Левая часть -->
-        <span class="navbar-brand">Admin Panel</span>
+        <span th:if="${#authentication.name == user.email and #authorization.expression('hasRole(''ROLE_ADMIN'')')}"
+                class="navbar-brand">Admin Panel</span>
 
         <!-- Правая часть -->
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center ms-auto">
             <span class="text-light me-3">
                 <span th:text="${#authentication.name}">admin@mail.ru</span>
                 with roles:
@@ -47,18 +48,24 @@
                         <h6 class="fw-bold">Current Role</h6>
                         <div class="list-group">
                             <span th:each="role, stat : ${user.roles}">
-                                <button th:onclick="'window.location.href = \'' + @{/admin/profile} + '\''"
-                                        th:if="${role.role == 'ADMIN'}" class="list-group-item list-group-item-action active">
-                                            <i class="bi bi-shield-check me-2"></i>ADMIN
+                                <button th:if="${role.role == 'ADMIN'}"
+                                        class="list-group-item list-group-item-action role-btn"
+                                        data-role="ADMIN"
+                                        th:onclick="'window.location.href = \'' + @{/admin/profile} + '\''">
+                                    <i class="bi bi-shield-check me-2"></i>ADMIN
                                 </button>
-                                <button th:onclick="'window.location.href = \'' + @{/user} + '\''"
-                                        th:if="${role.role == 'USER'}" class="list-group-item list-group-item-action">
-                                        <i class="bi bi-person me-2"></i>USER
+                                <button th:if="${role.role == 'USER'}"
+                                        class="list-group-item list-group-item-action role-btn"
+                                        data-role="USER"
+                                        th:onclick="'window.location.href = \'' + @{/user} + '\''">
+                                    <i class="bi bi-person me-2"></i>USER
                                 </button>
-                                <button th:onclick="'window.location.href = \'' + @{/user} + '\''"
-                                        th:if="${role.role != 'USER' && role.role != 'ADMIN'}" class="list-group-item list-group-item-action">
-                                        <i class="bi bi-gear me-2"></i>
-                                        <span th:text="${role.role}">Roles</span>
+                                <button th:if="${role.role != 'USER' && role.role != 'ADMIN'}"
+                                        class="list-group-item list-group-item-action role-btn"
+                                        th:attr="data-role=${role.role}"
+                                        th:onclick="'window.location.href = \'' + @{/user} + '\''">
+                                    <i class="bi bi-gear me-2"></i>
+                                    <span th:text="${role.role}">Roles</span>
                                 </button>
                             </span>
                         </div>
@@ -71,7 +78,7 @@
         <div class="col-lg-9 col-md-8">
             <!-- Заголовок и кнопки -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">Users Management</h4>
+                <h4 class="mb-0">User information-page</h4>
                 <div>
                 <span th:if="${#authentication.name == user.email and #authorization.expression('hasRole(''ROLE_ADMIN'')')}">
                 <!-- Кнопка показа таблицы -->
@@ -143,5 +150,32 @@
         });
     });
 </script>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleButtons = document.querySelectorAll('.role-btn');
+
+        // Восстанавливаем активную роль
+        const savedRole = localStorage.getItem('activeRole');
+        if (savedRole) {
+            const activeBtn = document.querySelector(`[data-role="${savedRole}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        } else if (roleButtons.length > 0) {
+            roleButtons[0].classList.add('active');
+        }
+
+        // Обработчики кликов
+        roleButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const role = this.getAttribute('data-role');
+                localStorage.setItem('activeRole', role);
+                roleButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    });
+</script>
+
 </body>
 </html>

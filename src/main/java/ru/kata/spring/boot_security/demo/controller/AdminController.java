@@ -48,24 +48,10 @@ public class AdminController {
         return "user-page";
     }
 
-    @GetMapping("/add")
-    public String addUser(Model model) {
-        model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleService.getAllRoles());
-        return "user-form";
-    }
-
     @PostMapping("/save")
     public String saveUser(@ModelAttribute("user") User user) {
         userService.saveUser(user);
         return "redirect:/admin";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable("id") int id, Model model) {
-        model.addAttribute("user", userService.getUserById(id));
-        model.addAttribute("allRoles", roleService.getAllRoles());
-        return "user-edit-form";
     }
 
     @PutMapping("/update/{id}")
